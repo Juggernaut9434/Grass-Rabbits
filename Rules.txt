@@ -1,0 +1,40 @@
+Rules
+
+nothing:
+
+after 5 ticks, toggle to grass
+
+grass:
+
+after 1 ticks, spread to all neighbors of nothing, radially
+
+bunnies:
+
+    generate
+        bunnie is generated when grass has all neighbors grass, wait 3 ticks
+    movement
+        bunnie moves in a random direction (up, down, left, right)
+        and continue to moves in that direction until dead or hits wall
+        when hit wall, go in other direction available
+        move each tick
+    eating
+        turns 3 pieces of grass in its direction (upper, middle, lower) into nothing
+    repopulating
+        after 7 ticks, 3 new bunnies in the opposite directions born
+    death
+        eaten by wolf
+        or
+        absolute no food in 5 ticks
+
+wolf:
+
+    generate
+        total bunnies > 7
+    movement
+        random direction for several ticks
+    eating 
+        eats the bunnie if it is a neighbor at all
+    repopulating
+        after 11 ticks, 1 new wolf
+    death
+        no food after 10 ticks
