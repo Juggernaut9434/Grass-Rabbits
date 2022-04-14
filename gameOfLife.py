@@ -3,7 +3,8 @@
 # for CSE355, Project, ASU
 # inspiration https://github.com/tdietert/pythonProjects/blob/master/GameOfLife.py
 # 
-# Each tick, the entire board is undated all at once
+# Each tick, the entire board is updated all at once
+# built with tkinter buttons and changing color
 
 from re import X
 import tkinter as tk
@@ -39,7 +40,8 @@ class GameOfLife(tk.Frame):
 
         self.initialUI()
 
-    # Build the UI with titles and periferals
+    """Build the UI with titles and periferals
+    """
     def initialUI(self):
 
         self.parent.title("Michael's Bunnies of Life")
@@ -57,6 +59,8 @@ class GameOfLife(tk.Frame):
         self.tick_count = tk.Label(self.parent, textvariable=self.tickStr)
         self.tick_count.grid(row=1,column=3)
 
+        ## Labels for count 
+
         self.grassNum = tk.StringVar()
         self.grass_count = tk.Label(self.parent, textvariable=self.grassNum)
         self.grass_count.grid(row=1, column=4)
@@ -70,7 +74,8 @@ class GameOfLife(tk.Frame):
         self.dead_count = tk.Label(self.parent, textvariable=self.deadNum)
         self.dead_count.grid(row=1, column=6)
 
-    # Starting to make the grid itself
+    """Starting to make the grid itself
+    """
     def build_grid(self):
 
         self.game_frame = tk.Frame(
@@ -85,12 +90,14 @@ class GameOfLife(tk.Frame):
         for i in range(self.size_x+2)]
         for j in range(self.size_y+2)]
 
+        # add command to btn to change in setup
         for i in range(1, self.size_y+1):
             for j in range(1, self.size_x+1):
                 self.cell_buttons[i][j].grid(row=i,column=j)
                 self.cell_buttons[i][j]['command'] = lambda i=i, j=j:self.cell_toggle(self.cell_buttons[i][j])
 
-    # Simulation of the game
+    """Simulate the game with rules
+    """
     def simulate_game(self):
         self.disable_buttons()
 
@@ -101,6 +108,7 @@ class GameOfLife(tk.Frame):
         to_dead = []
         to_nothing = []
 
+        # for each btn in the grid
         for i in range(1, self.size_y+1):
             for j in range(1, self.size_x+1):
                 coord = (i,j)
@@ -109,8 +117,7 @@ class GameOfLife(tk.Frame):
                 color = Cell(self.cell_buttons[i][j]['bg'])
                 if color is Cell.GRASS:
                     results = self.rule_grass(coord)
-                    to_grass.extend(results[0])
-                    to_bunnie.extend(results[1])
+                    to_grass.extend(results)
                 elif color is Cell.BUNNIE:
                     result = self.rule_bunnies(coord)
                     to_nothing.extend(result[0])
@@ -122,7 +129,7 @@ class GameOfLife(tk.Frame):
                     to_dead.extend(results[1])
                     to_nothing.extend(results[2])
 
-
+        # Time to update the grid with new colors and numbers
         self.totalBunnie = 0
         self.totalFox = 0
         self.totalGrass = 0
@@ -142,10 +149,11 @@ class GameOfLife(tk.Frame):
             self.cell_buttons[coord[0]][coord[1]]['bg'] = Cell.DEAD.value
             self.totalDead += 1
 
-        self.deadNum.set(self.totalDead)
-        self.bunnieNum.set(self.totalBunnie)
         self.grassNum.set(self.totalGrass)
+        self.bunnieNum.set(self.totalBunnie)
+        self.deadNum.set(self.totalDead)
 
+        # ticks, do it again
         if self.generate_next:
             self.after(1000, self.simulate_game)
             self.tick += 1
@@ -159,74 +167,42 @@ class GameOfLife(tk.Frame):
     # Rules
     #*************************
 
+    """ Simulate the dead the state upon rules
+    :param coord: the btn on the grid
+    :returns: grass[], dead[], nothing[]
+    """
     def rule_dead(self, coord):
         dead = []
         grass = []
         nothing = []
-        if self.tick % 105 == 0 or self.totalGrass > 70000:
-            return [], dead, []
-        if self.tick % 5 == 0:
-            if random.choice([0,1]) is 0:
-                grass.append(coord)
-            else:
-                nothing.append(coord)
+
         return grass, [], nothing
 
+    """ Rules for grass
+
+    :param coord: btn on the grid
+    :returns: grass[]
+    """
     def rule_grass(self, coord):
-        bunnie = []
-        # generate new bunnie 
-        bunnieGen = random.choice([0,1,2,3,4,5,6]) > 4 and (self.totalBunnie < 5 or self.totalGrass > 300)
-        if self.tick % 5 == 0 and bunnieGen is True:
-            directions = self.getNeighbors(coord)
-            for i in range(random.choice([1,2,3,4])):
-                choice = random.choice(directions)
-                bunnie.append(choice)
-                directions.remove(choice)
+        
+        return self.getNeighbors(coord)
 
-        return self.getNeighbors(coord), bunnie
-
+    """ Rules for bunnies
+    :param coord: btn in the grid
+    :returns: nothing[], bunnie[], dead[]
+    """
     def rule_bunnies(self, coord):
         nothing = []
         bunnie = []
         dead = []
-        # repopulation
-        if self.tick % 3 == 0:
-            bunnie.append( (coord[0]-1, coord[1]-1) ) # tl
-            bunnie.append( (coord[0]+1, coord[1]-1) ) # tr
-            bunnie.append( (coord[0]-1, coord[1]+1) ) # bl
-            bunnie.append( (coord[0]+1, coord[1]+1) ) # br
-
-        # moving, eating
-        else:
-            death = 0
-            directions = self.getNeighbors(coord)
-            # eating
-            for i in range(random.choice([2,3,4])):
-                choice = random.choice(directions)
-                if self.cell_buttons[choice[0]][choice[1]]['bg'] != Cell.GRASS.value:
-                    nothing.append(choice)
-                    directions.remove(choice)
-                    death += 1
-
-            # death
-            if death > 2:
-                try:
-                    bunnie.remove(coord)
-                except ValueError:
-                    pass                
-                dead.append(coord)
-            # moving
-            else:
-                directions = self.getNeighbors(coord)
-                nextDirection = random.choice(directions)
-                bunnie.append(nextDirection)
-                try:
-                    bunnie.remove(coord)
-                except ValueError:
-                    pass
-
         return nothing, bunnie, dead
-        
+    
+    """ Helper function to get the btns nearby coord
+    Not including the btn itself
+
+    :param coord: btn in the grid
+    :returns: array of nearby coords
+    """
     def getNeighbors(self, coord):
         neighbors = []
         neighbors.append(coord) # center
