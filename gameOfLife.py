@@ -139,32 +139,47 @@ class GameOfLife(tk.Frame):
                 else:
                     pass
 
-        # Time to update the grid with new colors and numbers
+        # Update grid with next generation
+        for coord in to_grass:
+            self.cell_buttons[coord[0]][coord[1]]['bg'] = Cell.GRASS.value
+        for coord in to_nothing:
+            self.cell_buttons[coord[0]][coord[1]]['bg'] = Cell.NOTHING.value
+        for coord in to_bunnie:
+            self.cell_buttons[coord[0]][coord[1]]['bg'] = Cell.BUNNIE.value
+        for coord in to_fox:
+            self.cell_buttons[coord[0]][coord[1]]['bg'] = Cell.FOX.value
+        for coord in to_dead:
+            self.cell_buttons[coord[0]][coord[1]]['bg'] = Cell.DEAD.value
+
+        # zero the numbers
         self.totalBunnie = 0
         self.totalFox = 0
         self.totalGrass = 0
         self.totalDead = 0
-        for coord in to_grass:
-            self.cell_buttons[coord[0]][coord[1]]['bg'] = Cell.GRASS.value
-            self.totalGrass += 1
-        for coord in to_bunnie:
-            self.cell_buttons[coord[0]][coord[1]]['bg'] = Cell.BUNNIE.value
-            self.totalBunnie += 1
-        for coord in to_fox:
-            self.cell_buttons[coord[0]][coord[1]]['bg'] = Cell.FOX.value
-            self.totalFox += 1
-        for coord in to_nothing:
-            self.cell_buttons[coord[0]][coord[1]]['bg'] = Cell.NOTHING.value
-        for coord in to_dead:
-            self.cell_buttons[coord[0]][coord[1]]['bg'] = Cell.DEAD.value
-            self.totalDead += 1
 
+        # update the grid numbers
+        for i in range(1, self.size_y + 1):
+            for j in range(1, self.size_x + 1):
+                coord = (i, j)
+
+                if self.is_equal_cell(coord, Cell.GRASS.value):
+                    self.totalGrass += 1
+                elif self.is_equal_cell(coord, Cell.BUNNIE.value):
+                    self.totalBunnie += 1
+                elif self.is_equal_cell(coord, Cell.FOX.value):
+                    self.totalFox += 1
+                elif self.is_equal_cell(coord, Cell.DEAD.value):
+                    self.totalDead += 1
+                else:
+                    pass
+
+        # Set the count to the labels
         self.grassNum.set(str(self.totalGrass))
         self.bunnieNum.set(str(self.totalBunnie))
         self.deadNum.set(str(self.totalDead))
 
-        # ticks, do it again
-        if self.generate_next:
+        # ticks, do it again, stop at 50 ticks
+        if self.generate_next and self.tick < 50:
             self.after(1000, self.simulate_game)
             self.tick += 1
             self.tickStr.set(str(self.tick))
