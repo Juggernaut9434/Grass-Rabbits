@@ -120,13 +120,13 @@ class GameOfLife(tk.Frame):
                     # grass generation
                     to_grass.extend(self.rule_grass_growth(coord))
                     # bunnie generation
-                    to_bunnie.extend(self.rule_bunnies_generation(coord))
+                    to_bunnie.extend(self.rule_bunnies_generation(coord, to_bunnie))
                 elif color is Cell.BUNNIE:
                     # bunnie movement
                     # bunnie eating
                     # bunnie re population
                     # bunnie death
-                    to_bunnie.extend()
+                    pass
                 elif color is Cell.DEAD:
                     # death to grass in some time
                     pass
@@ -198,16 +198,21 @@ class GameOfLife(tk.Frame):
     :param coord: btn in the grid
     :returns: nothing[], bunnie[], dead[]
     """
-    def rule_bunnies_generation(self, coord):
+    def rule_bunnies_generation(self, coord, to_b):
         bunnie = []
         # if surrounded by grass, add a bunnie
         if self.tick % 5 == 0:
             neighbors = self.getNeighbors(coord)
             # don't share neighbors to be bunnies. every other
             for c in neighbors:
-                if self.cell_buttons[c[0]][c[1]]['bg'] == Cell.GRASS.value \
-                    and c not in bunnie:
-                    bunnie.append(coord)
+                if self.cell_buttons[c[0]][c[1]]['bg'] == Cell.GRASS.value:
+                    if c in to_b:
+                        return bunnie
+                    else:
+                        pass
+                else:
+                    pass
+            bunnie.append(coord)
         return bunnie
 
 
