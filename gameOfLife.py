@@ -140,6 +140,8 @@ class GameOfLife(tk.Frame):
                     pass
 
         # Update grid with next generation
+        # the order of updating is important
+        # grass > nothing > bunnie > fox > dead
         for coord in to_grass:
             self.cell_buttons[coord[0]][coord[1]]['bg'] = Cell.GRASS.value
         for coord in to_nothing:
@@ -370,6 +372,15 @@ class GameOfLife(tk.Frame):
 
 
         return neighbors
+
+    def getGrandNeighbors(self, coord):
+        neighbors = self.getNeighbors(coord)
+        grandNeighbors = []
+        for c in neighbors:
+            grandNeighbors.extend(self.getNeighbors(c))
+
+        # remove duplicates
+        return list(set(grandNeighbors))
 
     def is_equal_cell(self, coord, value):
         return self.cell_buttons[coord[0]][coord[1]]['bg'] == value
