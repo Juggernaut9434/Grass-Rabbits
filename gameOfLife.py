@@ -265,16 +265,22 @@ class GameOfLife(tk.Frame):
 
         return bunnie, nothing
 
+    """Rule bunnie eating
+    they eat 4 of the neighbors if possible (edges)
+    """
     def rule_bunnie_eating(self, coord):
         nothing = []
 
         # eat 4 of the 8 neighboring grass at random
         neighbors = self.getNeighbors(coord)
         for i in range(4):
-            c = random.choice(neighbors)
-            neighbors.remove(c)
-            if self.is_equal_cell(c, Cell.GRASS.value):
-                nothing.append(c)
+            try:
+                c = random.choice(neighbors)
+                neighbors.remove(c)
+                if self.is_equal_cell(c, Cell.GRASS.value):
+                    nothing.append(c)
+            except IndexError:
+                pass
 
         return nothing
 
@@ -301,7 +307,6 @@ class GameOfLife(tk.Frame):
     """
     def getNeighbors(self, coord):
         neighbors = []
-        neighbors.append(coord) # center
         neighbors.append( (coord[0]-1, coord[1]) ) # left
         neighbors.append( (coord[0]+1, coord[1]) ) # right
         neighbors.append( (coord[0], coord[1]-1) ) # up
@@ -310,6 +315,59 @@ class GameOfLife(tk.Frame):
         neighbors.append( (coord[0]+1, coord[1]-1) ) # tr
         neighbors.append( (coord[0]-1, coord[1]+1) ) # bl
         neighbors.append( (coord[0]+1, coord[1]+1) ) # br
+
+        # get rid of invalid sides 0 and self.size_x + 1, for [0], similar for [1]
+        try:
+            neighbors.remove((0, coord[1]))
+        except ValueError:
+            pass
+        try:
+            neighbors.remove((0, coord[1] + 1))
+        except ValueError:
+            pass
+        try:
+            neighbors.remove((0, coord[1] - 1))
+        except ValueError:
+            pass
+        try:
+            neighbors.remove((coord[0], 0))
+        except ValueError:
+            pass
+        try:
+            neighbors.remove((coord[0] + 1, 0))
+        except ValueError:
+            pass
+        try:
+            neighbors.remove((coord[0] - 1, 0))
+        except ValueError:
+            pass
+        try:
+            neighbors.remove((self.size_x + 1, coord[1]))
+        except ValueError:
+            pass
+        try:
+            neighbors.remove((self.size_x + 1, coord[1] + 1))
+        except ValueError:
+            pass
+        try:
+            neighbors.remove((self.size_x + 1, coord[1] - 1))
+        except ValueError:
+            pass
+        try:
+            neighbors.remove((coord[0], self.size_y + 1))
+        except ValueError:
+            pass
+        try:
+            neighbors.remove((coord[0] + 1, self.size_y + 1))
+        except ValueError:
+            pass
+        try:
+            neighbors.remove((coord[0] - 1, self.size_y + 1))
+        except ValueError:
+            pass
+
+
+
 
         return neighbors
 
