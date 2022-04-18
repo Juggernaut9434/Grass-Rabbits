@@ -122,11 +122,13 @@ class GameOfLife(tk.Frame):
                     # bunnie generation
                     to_bunnie.extend(self.rule_bunnies_generation(coord, to_bunnie))
                 elif color is Cell.BUNNIE:
-                    result = self.rule_bunnie_movement(coord)
+                    move = self.rule_bunnie_movement(coord)
                     # bunnie movement
-                    to_bunnie.extend(result[0])
-                    to_nothing.extend(result[1])
+                    to_bunnie.extend(move[0])
+                    to_nothing.extend(move[1])
                     # bunnie eating
+                    eat = self.rule_bunnie_eating(coord)
+                    to_nothing.extend(eat)
                     # bunnie re population
                     # bunnie death
                 elif color is Cell.DEAD:
@@ -208,11 +210,11 @@ class GameOfLife(tk.Frame):
     def rule_bunnies_generation(self, coord, to_b):
         bunnie = []
         # if surrounded by grass, add a bunnie
-        if self.tick % 5 == 0 and self.tick < 9:
+        if self.tick % 5 == 2 and self.tick < 9:
             neighbors = self.getNeighbors(coord)
             # don't share neighbors to be bunnies. every other
             for c in neighbors:
-                if self.cell_buttons[c[0]][c[1]]['bg'] == Cell.GRASS.value:
+                if self.is_equal_cell(coord, Cell.GRASS.value):
                     if c in to_b:
                         return bunnie
                     else:
@@ -239,6 +241,20 @@ class GameOfLife(tk.Frame):
         nothing.append(coord)
 
         return bunnie, nothing
+
+    def rule_bunnie_eating(self, coord):
+        nothing = []
+
+        # eat 4 of the 8 neighboring grass at random
+        neighbors = self.getNeighbors(coord)
+        for i in range(4):
+            c = random.choice(neighbors)
+            neighbors.remove(c)
+            if self.is_equal_cell(c, Cell.GRASS.value):
+                nothing.append(c)
+
+        return nothing
+
     
     """ Helper function to get the btns nearby coord
     Not including the btn itself
@@ -260,7 +276,8 @@ class GameOfLife(tk.Frame):
 
         return neighbors
 
-
+    def is_equal_cell(self, coord, value):
+        return self.cell_buttons[coord[0]][coord[1]]['bg'] == value
 
     #******************************************************************************#
     # button Config
