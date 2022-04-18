@@ -30,8 +30,8 @@ class GameOfLife(tk.Frame):
         self.parent = parent
         self.grid(row=0, column=0)
 
-        self.size_x = 30
-        self.size_y = 30
+        self.size_x = 20
+        self.size_y = 20
         self.cell_buttons = []
         self.generate_next = True
         self.tick = 0
@@ -131,6 +131,8 @@ class GameOfLife(tk.Frame):
                     to_nothing.extend(eat)
                     # bunnie re population
                     # bunnie death
+                    death = self.rule_bunnie_death(coord)
+                    to_dead.extend(death[0])
                 elif color is Cell.DEAD:
                     # death to grass in some time
                     pass
@@ -236,7 +238,11 @@ class GameOfLife(tk.Frame):
 
         # move to a random neighbor
         neighbors = self.getNeighbors(coord)
-        bunnie.append(neighbors[random.randint(0,7)])
+
+        if self.rule_bunnie_death(coord)[1]:
+            pass
+        else:
+            bunnie.append(neighbors[random.randint(0,len(neighbors)-1)])
 
         nothing.append(coord)
 
@@ -255,6 +261,20 @@ class GameOfLife(tk.Frame):
 
         return nothing
 
+    def rule_bunnie_death(self, coord):
+        dead = []
+        death = False
+
+        neighbors = self.getNeighbors(coord)
+        count = 0
+        for c in neighbors:
+            if self.is_equal_cell(c, Cell.GRASS.value):
+                count += 1
+        if count <= 2:
+            dead.append(coord)
+            death = True
+
+        return dead, death
     
     """ Helper function to get the btns nearby coord
     Not including the btn itself
