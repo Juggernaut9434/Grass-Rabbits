@@ -11,6 +11,9 @@ import time
 from enum import Enum
 import random
 
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+
 
 # ENUM to have a more clear understanding of each cell
 class Cell(Enum):
@@ -75,6 +78,17 @@ class GameOfLife(tk.Frame):
         self.dead_count = tk.Label(self.parent, textvariable=self.deadNum)
         self.dead_count.grid(row=1, column=6)
 
+        figure_g = plt.Figure(figsize=(6,3), dpi=100)
+        self.plot_g = figure_g.add_subplot(1,1,1)
+        canvas_g = FigureCanvasTkAgg(figure_g, self.parent)
+        canvas_g.get_tk_widget().grid(row=2, column=self.size_x+2)
+
+        # figure_b = plt.Figure(figsize=(6,3), dpi=100)
+        # self.plot_b = figure_b.add_subplot(1,1,1)
+        # canvas_b = FigureCanvasTkAgg(figure_b, self.parent)
+        # canvas_b.get_tk_widget().grid(row=3, column=self.size_x+2)
+
+
     """Starting to make the grid itself
     """
     def build_grid(self):
@@ -129,7 +143,7 @@ class GameOfLife(tk.Frame):
                     # bunnie eating
                     eat = self.rule_bunnie_eating(coord)
                     to_nothing.extend(eat)
-                    # bunnie re population
+                    # bunnie re population todo
                     # bunnie death
                     death = self.rule_bunnie_death(coord)
                     to_dead.extend(death[0])
@@ -182,6 +196,10 @@ class GameOfLife(tk.Frame):
 
         # ticks, do it again, stop at 50 ticks
         if self.generate_next and self.tick < 50:
+            self.plot_g.plot(self.tick, self.totalGrass, color="green", marker="o", linestyle="")
+            # self.plot_b.plot(self.tick, self.totalBunnie, color="blue", marker="x", linestyle="")
+
+
             self.after(1000, self.simulate_game)
             self.tick += 1
             self.tickStr.set(str(self.tick))
@@ -215,7 +233,7 @@ class GameOfLife(tk.Frame):
     """
     def rule_grass_growth(self, coord):
         
-        if self.tick % 2 ==0 :
+        if self.tick % 3 ==0 :
             return self.getNeighbors(coord)
         else:
             return []
