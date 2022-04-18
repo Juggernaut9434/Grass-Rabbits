@@ -122,11 +122,13 @@ class GameOfLife(tk.Frame):
                     # bunnie generation
                     to_bunnie.extend(self.rule_bunnies_generation(coord, to_bunnie))
                 elif color is Cell.BUNNIE:
+                    result = self.rule_bunnie_movement(coord)
                     # bunnie movement
+                    to_bunnie.extend(result[0])
+                    to_nothing.extend(result[1])
                     # bunnie eating
                     # bunnie re population
                     # bunnie death
-                    pass
                 elif color is Cell.DEAD:
                     # death to grass in some time
                     pass
@@ -134,28 +136,28 @@ class GameOfLife(tk.Frame):
                     pass
 
         # Time to update the grid with new colors and numbers
-        totalBunnie = 0
-        totalFox = 0
-        totalGrass = 0
-        totalDead = 0
+        self.totalBunnie = 0
+        self.totalFox = 0
+        self.totalGrass = 0
+        self.totalDead = 0
         for coord in to_grass:
             self.cell_buttons[coord[0]][coord[1]]['bg'] = Cell.GRASS.value
-            totalGrass += 1
+            self.totalGrass += 1
         for coord in to_bunnie:
             self.cell_buttons[coord[0]][coord[1]]['bg'] = Cell.BUNNIE.value
-            totalBunnie += 1
+            self.totalBunnie += 1
         for coord in to_fox:
             self.cell_buttons[coord[0]][coord[1]]['bg'] = Cell.FOX.value
-            totalFox += 1
+            self.totalFox += 1
         for coord in to_nothing:
             self.cell_buttons[coord[0]][coord[1]]['bg'] = Cell.NOTHING.value
         for coord in to_dead:
             self.cell_buttons[coord[0]][coord[1]]['bg'] = Cell.DEAD.value
-            totalDead += 1
+            self.totalDead += 1
 
-        self.grassNum.set(str(totalGrass))
-        self.bunnieNum.set(str(totalBunnie))
-        self.deadNum.set(str(totalDead))
+        self.grassNum.set(str(self.totalGrass))
+        self.bunnieNum.set(str(self.totalBunnie))
+        self.deadNum.set(str(self.totalDead))
 
         # ticks, do it again
         if self.generate_next:
@@ -186,22 +188,27 @@ class GameOfLife(tk.Frame):
         return grass, nothing
 
     """ Rules for grass
-
+    Generate new grass every other tick
     :param coord: btn on the grid
     :returns: grass[]
     """
     def rule_grass_growth(self, coord):
         
-        return self.getNeighbors(coord)
+        if self.tick % 2 ==0 :
+            return self.getNeighbors(coord)
+        else:
+            return []
 
     """ Rules for bunnies
+    when completely surrounded by grass, new bunnie appears
+    and population is less than 10% of board
     :param coord: btn in the grid
     :returns: nothing[], bunnie[], dead[]
     """
     def rule_bunnies_generation(self, coord, to_b):
         bunnie = []
         # if surrounded by grass, add a bunnie
-        if self.tick % 5 == 0:
+        if self.tick % 5 == 0 and self.tick < 9:
             neighbors = self.getNeighbors(coord)
             # don't share neighbors to be bunnies. every other
             for c in neighbors:
@@ -215,7 +222,23 @@ class GameOfLife(tk.Frame):
             bunnie.append(coord)
         return bunnie
 
+    """ Rule for bunnie movement
+    move in a random direction every tick
+    TODO no detection of collision of bunnies
+    :param coord: coordinate of the bunnie on the board
+    :returns: a neighbor at random
+    """
+    def rule_bunnie_movement(self, coord):
+        bunnie = []
+        nothing = []
 
+        # move to a random neighbor
+        neighbors = self.getNeighbors(coord)
+        bunnie.append(neighbors[random.randint(0,7)])
+
+        nothing.append(coord)
+
+        return bunnie, nothing
     
     """ Helper function to get the btns nearby coord
     Not including the btn itself
