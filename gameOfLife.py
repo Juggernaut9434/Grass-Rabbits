@@ -227,7 +227,7 @@ class GameOfLife(tk.Frame):
     def rule_bunnies_generation(self, coord, to_b):
         bunnie = []
         # if surrounded by grass, add a bunnie
-        if self.tick % 5 == 2 and self.tick < 9:
+        if self.tick % 5 == 2 and (self.totalBunnie / self.totalGrass < 0.1):
             neighbors = self.getNeighbors(coord)
             # don't share neighbors to be bunnies. every other
             for c in neighbors:
@@ -238,7 +238,9 @@ class GameOfLife(tk.Frame):
                         pass
                 else:
                     pass
-            bunnie.append(coord)
+            chance = random.randint(0,self.tick) == 0
+            if chance:
+                bunnie.append(coord)
         return bunnie
 
     """ Rule for bunnie movement
