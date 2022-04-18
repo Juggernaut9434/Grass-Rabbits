@@ -6,11 +6,11 @@
 # Each tick, the entire board is updated all at once
 # built with tkinter buttons and changing color
 
-from re import X
 import tkinter as tk
 import time
 from enum import Enum
 import random
+
 
 # ENUM to have a more clear understanding of each cell
 class Cell(Enum):
@@ -19,6 +19,7 @@ class Cell(Enum):
     BUNNIE = 'cyan'
     FOX = 'orange'
     DEAD = 'black'
+
 
 class GameOfLife(tk.Frame):
 
@@ -116,42 +117,45 @@ class GameOfLife(tk.Frame):
                 # Rules
                 color = Cell(self.cell_buttons[i][j]['bg'])
                 if color is Cell.GRASS:
-                    results = self.rule_grass(coord)
-                    to_grass.extend(results)
+                    # grass generation
+                    to_grass.extend(self.rule_grass_growth(coord))
+                    # bunnie generation
+                    to_bunnie.extend(self.rule_bunnies_generation(coord))
                 elif color is Cell.BUNNIE:
-                    result = self.rule_bunnies(coord)
-                    to_nothing.extend(result[0])
-                    to_bunnie.extend(result[1])
-                    to_dead.extend(result[2])
+                    # bunnie movement
+                    # bunnie eating
+                    # bunnie re population
+                    # bunnie death
+                    to_bunnie.extend()
                 elif color is Cell.DEAD:
-                    results = self.rule_dead(coord)
-                    to_grass.extend(results[0])
-                    to_dead.extend(results[1])
-                    to_nothing.extend(results[2])
+                    # death to grass in some time
+                    pass
+                else:
+                    pass
 
         # Time to update the grid with new colors and numbers
-        self.totalBunnie = 0
-        self.totalFox = 0
-        self.totalGrass = 0
-        self.totalDead = 0
+        totalBunnie = 0
+        totalFox = 0
+        totalGrass = 0
+        totalDead = 0
         for coord in to_grass:
             self.cell_buttons[coord[0]][coord[1]]['bg'] = Cell.GRASS.value
-            self.totalGrass += 1
+            totalGrass += 1
         for coord in to_bunnie:
             self.cell_buttons[coord[0]][coord[1]]['bg'] = Cell.BUNNIE.value
-            self.totalBunnie += 1
+            totalBunnie += 1
         for coord in to_fox:
             self.cell_buttons[coord[0]][coord[1]]['bg'] = Cell.FOX.value
-            self.totalFox += 1
+            totalFox += 1
         for coord in to_nothing:
             self.cell_buttons[coord[0]][coord[1]]['bg'] = Cell.NOTHING.value
         for coord in to_dead:
             self.cell_buttons[coord[0]][coord[1]]['bg'] = Cell.DEAD.value
-            self.totalDead += 1
+            totalDead += 1
 
-        self.grassNum.set(self.totalGrass)
-        self.bunnieNum.set(self.totalBunnie)
-        self.deadNum.set(self.totalDead)
+        self.grassNum.set(str(totalGrass))
+        self.bunnieNum.set(str(totalBunnie))
+        self.deadNum.set(str(totalDead))
 
         # ticks, do it again
         if self.generate_next:
@@ -161,8 +165,6 @@ class GameOfLife(tk.Frame):
         else:
             self.enable_buttons()
 
-        return
-
     #*************************
     # Rules
     #*************************
@@ -171,19 +173,24 @@ class GameOfLife(tk.Frame):
     :param coord: the btn on the grid
     :returns: grass[], dead[], nothing[]
     """
-    def rule_dead(self, coord):
-        dead = []
+    def rule_dead_to_grass_or_nothing(self, coord):
         grass = []
         nothing = []
 
-        return grass, [], nothing
+        # on a tick count, convert dead to grass or nothing
+        if self.tick % 4 == 0:
+            if random.choice(0,1) == 0:
+                grass.append(coord)
+            else:
+                nothing.append(coord)
+        return grass, nothing
 
     """ Rules for grass
 
     :param coord: btn on the grid
     :returns: grass[]
     """
-    def rule_grass(self, coord):
+    def rule_grass_growth(self, coord):
         
         return self.getNeighbors(coord)
 
@@ -191,11 +198,19 @@ class GameOfLife(tk.Frame):
     :param coord: btn in the grid
     :returns: nothing[], bunnie[], dead[]
     """
-    def rule_bunnies(self, coord):
-        nothing = []
+    def rule_bunnies_generation(self, coord):
         bunnie = []
-        dead = []
-        return nothing, bunnie, dead
+        # if surrounded by grass, add a bunnie
+        if self.tick % 5 == 0:
+            neighbors = self.getNeighbors(coord)
+            # don't share neighbors to be bunnies. every other
+            for c in neighbors:
+                if self.cell_buttons[c[0]][c[1]]['bg'] == Cell.GRASS.value \
+                    and c not in bunnie:
+                    bunnie.append(coord)
+        return bunnie
+
+
     
     """ Helper function to get the btns nearby coord
     Not including the btn itself
