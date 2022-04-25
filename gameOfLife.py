@@ -233,7 +233,7 @@ class GameOfLife(tk.Frame):
     """
     def rule_grass_growth(self, coord):
         
-        if self.tick % 3 ==0 :
+        if self.tick % 2 ==0 :
             return self.getNeighbors(coord)
         else:
             return []
@@ -424,7 +424,9 @@ class GameOfLife(tk.Frame):
 
         self.reset_button.configure(state = tk.DISABLED)
         self.start_button.configure(state = tk.NORMAL)
+        self.reset_game()
         self.generate_next = True
+
 
     def cell_toggle(self, cell):
         # nothing -> grass
